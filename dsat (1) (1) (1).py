@@ -19,7 +19,10 @@ def strip_tags(html):
     s.feed(html)
     return s.get_data()
 
-
+def randomTesting(testList):
+    for line in testList:
+        print(line)
+        print()
 """
 Opening website html on python
 """
@@ -42,11 +45,11 @@ def geturl():
 
 
 
-product_url = geturl()
+##product_url = geturl()
+##
+##print("The full URL is",product_url)
 
-print("The full URL is",product_url)
-
-page = urllib.request.urlopen(product_url)
+page = urllib.request.urlopen("http://www.dell.com/uk/p/inspiron-14-3451-laptop/pd?oc=cn35104")
 
 soup = BeautifulSoup(page)
 
@@ -78,6 +81,7 @@ titles=[]
 for line in fixList:
     titles.append(strip_tags(line))
 titles.append("Price")
+
 ##for line in titles:
 ##    print(line)
 
@@ -94,7 +98,7 @@ for line in right:
 ##    print(line)
 ##    print()
 lines=[]
-for i in range(25,48):
+for i in range(25,len(titles)+26):
     lines.append(strip_tags(str(test[i])))
 deletePart=[]
 i=-1
@@ -104,7 +108,7 @@ for i in deletePart:
 
 for line in lines:
     i+=1
-    if '\xa0' in line:
+    if len(line) <=1:
         deletePart.append(i)
     elif 'Choose Options' in line:
         deletePart.append(i)
@@ -112,8 +116,9 @@ deletePart.sort(reverse=True)
 del deletePart[0]
 for num in deletePart:
     lines.pop(num)
-lines.append("£"+ strip_tags(str(test[22])))
+lines.append("£"+ strip_tags(str(test[44])))
 
+##randomTesting(test)
 ##commaSep=lines[11].split(",")
 ##moreSep=commaSep[1].split("/")
 ##portsDetail=commaSep+moreSep
@@ -130,7 +135,7 @@ lines.append("£"+ strip_tags(str(test[22])))
 """
 Exporting to a file
 """
-del(titles[5])
+##del(titles[5])
 ##computer = input("Enter the name of your purchase: ")+".txt"
 file = open("computer.txt", 'w+')
 index=0
