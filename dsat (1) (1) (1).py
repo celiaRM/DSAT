@@ -49,7 +49,7 @@ def geturl():
 ##
 ##print("The full URL is",product_url)
 
-page = urllib.request.urlopen("http://www.dell.com/uk/p/inspiron-14-3451-laptop/pd?oc=cn35104")
+page = urllib.request.urlopen("http://www.dell.com/uk/p/alienware-13/pd?oc=n00aw301&model_id=alienware-13")
 
 soup = BeautifulSoup(page)
 
@@ -89,69 +89,103 @@ titles.append("Price")
 Code for printing the details of each title
 """  
 right=soup.find_all("span")
+
 test=[]
 
 for line in right:
     test.append(line)
 
+yay = open("miracle.txt", 'w+')
+
+"""
+    Code for accessing parameters efficiently 
+"""
+for line in test:
+    yay.write(str(line))
+    yay.write("\n")
+    print(str(line))
+yay.close()
+superList=[]
+letsFix=open("miracle.txt")
+for line in letsFix:
+    superList.append(line)
+
+for line in superList:
+    if '<span class="shortSpec spec~bjAwYXczMDE~6759">' in line:
+        print("yay")
+##notices = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~463"})             #code for finding specific things
+##print(notices)
+##for line in right:
+##    test.append(strip_tags(str(line)))
+##
+####for line in test:
+####    print(line)
+####    print()
+####randomTesting(test)
+##start=0
 ##for line in test:
-##    print(line)
-##    print()
-lines=[]
-for i in range(25,len(titles)+26):
-    lines.append(strip_tags(str(test[i])))
-deletePart=[]
-i=-1
-
-for i in deletePart:
-    lines.pop(i)
-
-for line in lines:
-    i+=1
-    if len(line) <=1:
-        deletePart.append(i)
-    elif 'Choose Options' in line:
-        deletePart.append(i)
-deletePart.sort(reverse=True)
-del deletePart[0]
-for num in deletePart:
-    lines.pop(num)
-lines.append("£"+ strip_tags(str(test[44])))
-
-##randomTesting(test)
-##commaSep=lines[11].split(",")
-##moreSep=commaSep[1].split("/")
-##portsDetail=commaSep+moreSep
-
-##for line in lines:
-##    print (line)
-##    print()
-
-
-##see=str(test[25])
-##testing=strip_tags(see)
-##print(testing)
+##    start+=1
+##    if "Processor" in line:
+##        break
+##print(start)
+##print(len(test))
+####lines=[]
+####
+####for i in range(start,len(titles)+26):
+####    lines.append(strip_tags(str(test[i])))
+####deletePart=[]
+####i=-1
+####
+####for i in deletePart:
+####    lines.pop(i)
+####
+####for line in lines:
+####    i+=1
+####    if len(line) <=1:
+####        deletePart.append(i)
+####    elif 'Choose Options' in line:
+####        deletePart.append(i)
+####deletePart.sort(reverse=True)
+######del deletePart[0]
+####for num in deletePart:
+####    lines.pop(num)
+####lines.append(strip_tags(str(test[44])))
+##
+####randomTesting(test)
+####commaSep=lines[11].split(",")
+####moreSep=commaSep[1].split("/")
+####portsDetail=commaSep+moreSep
+##
+####for line in lines:
+####    print (line)
+####    print()
+##
+##
+####see=str(test[25])
+####testing=strip_tags(see)
+####print(testing)
 
 """
 Exporting to a file
 """
-##del(titles[5])
-##computer = input("Enter the name of your purchase: ")+".txt"
-file = open("computer.txt", 'w+')
-index=0
 
-while index!=len(titles):
-    file.write(titles[index].upper()+":")
-    file.write("\n")
-##    if index == 11:
-##        for line in portsDetail:
-##            file.write("-"+line)
-##            file.write("\n")
-##        file.write("\n")
-    file.write(lines[index])
-    file.write("\n")
-    file.write("\n")
-    index += 1
+####computer = input("Enter the name of your purchase: ")+".txt"
+##file = open("computer.txt", 'w+')
+##index=0
+##print(len(lines))
+##print(len(titles))
+##while index!=len(titles):
+##    file.write(titles[index].upper()+":")
+##    file.write("\n")
+####    if index == 11:
+####        for line in portsDetail:
+####            file.write("-"+line)
+####            file.write("\n")
+####        file.write("\n")
+##    file.write(lines[index])
+##    file.write("\n")
+##    file.write("\n")
+##    index += 1
 
 ##for line in lines:
 ##    for title in titles:
@@ -160,4 +194,4 @@ while index!=len(titles):
 ##        break
 ##    file.write(line)
         
-file.close()
+##file.close()
