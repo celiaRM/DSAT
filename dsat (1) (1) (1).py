@@ -49,18 +49,18 @@ def geturl():
 ##
 ##print("The full URL is",product_url)
 
-page = urllib.request.urlopen("http://www.dell.com/uk/p/alienware-13/pd?oc=n00aw301&model_id=alienware-13")
+page = urllib.request.urlopen("http://www.dell.com/uk/p/xps-13-9343-laptop/pd?oc=cnx4310&model_id=xps-13-9343-laptop")
 
 soup = BeautifulSoup(page)
 
-alls=soup.find_all("h5")
+allTitles=soup.find_all("h5")
 
 """
 Code for printing titles
 """
 
 ok=[]
-for h5 in alls:
+for h5 in allTitles:
     if h5 != "</h5>" or h5 != "<h5>":
         ok.append(h5)
 
@@ -82,12 +82,13 @@ for line in fixList:
     titles.append(strip_tags(line))
 titles.append("Price")
 
-##for line in titles:
-##    print(line)
-
 """
-Code for printing the details of each title
-"""  
+Code for accessing parameters efficiently 
+"""
+
+alright=soup.find_all("div", class_="specContent")      #this line will fix everything tomorrow
+
+
 right=soup.find_all("span")
 
 test=[]
@@ -95,85 +96,76 @@ test=[]
 for line in right:
     test.append(line)
 
-yay = open("miracle.txt", 'w+')
-
-"""
-    Code for accessing parameters efficiently 
-"""
+start=0
+locatorStart = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~146"})             #code for finding specific things
 for line in test:
-    yay.write(str(line))
-    yay.write("\n")
-    print(str(line))
-yay.close()
-superList=[]
-letsFix=open("miracle.txt")
-for line in letsFix:
-    superList.append(line)
+    if locatorStart == line:
+        break
+    start += 1
 
-for line in superList:
-    if '<span class="shortSpec spec~bjAwYXczMDE~6759">' in line:
-        print("yay")
-##notices = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~463"})             #code for finding specific things
-##print(notices)
-##for line in right:
-##    test.append(strip_tags(str(line)))
-##
-####for line in test:
-####    print(line)
-####    print()
-####randomTesting(test)
-##start=0
-##for line in test:
-##    start+=1
-##    if "Processor" in line:
-##        break
-##print(start)
-##print(len(test))
-####lines=[]
-####
-####for i in range(start,len(titles)+26):
-####    lines.append(strip_tags(str(test[i])))
-####deletePart=[]
-####i=-1
-####
-####for i in deletePart:
-####    lines.pop(i)
-####
-####for line in lines:
-####    i+=1
-####    if len(line) <=1:
-####        deletePart.append(i)
-####    elif 'Choose Options' in line:
-####        deletePart.append(i)
-####deletePart.sort(reverse=True)
-######del deletePart[0]
-####for num in deletePart:
-####    lines.pop(num)
-####lines.append(strip_tags(str(test[44])))
-##
-####randomTesting(test)
+priceIndex=0
+locatorPrice = soup.find("span", {"class" : "pAmt strike"})
+for line in test:
+    if locatorPrice == line:
+        break
+    priceIndex += 1
+
+
+"""
+Code for printing the details of each title
+"""
+info=[]
+for line in right:
+    info.append(line)
+randomTesting(info)
+lines=[]
+print(len(info))
+for i in range(start,len(titles)+start):
+    lines.append(strip_tags(str(info[i])))
+deletePart=[]
+i=0
+emptStr=0
+##randomTesting(lines)
+for line in lines:
+    if len(line) <=1:
+        if emptStr>0 :
+            deletePart.append(i)
+            emptStr=0
+    elif '/xa0' in line:
+        if emptStr>0 :
+            deletePart.append(i)
+            emptStr=0
+    elif 'Choose Options' in line:
+        deletePart.append(i)
+        emptStr += 1
+    i+=1
+print(deletePart)
+deletePart.sort(reverse=True)
+
+for i in deletePart:
+    lines.pop(i)
+    
+
+##del deletePart[0]
+##for num in deletePart:
+##    lines.pop(num)
+lines.append(strip_tags(str(test[priceIndex+4])))
+
 ####commaSep=lines[11].split(",")
 ####moreSep=commaSep[1].split("/")
 ####portsDetail=commaSep+moreSep
 ##
-####for line in lines:
-####    print (line)
-####    print()
-##
-##
-####see=str(test[25])
-####testing=strip_tags(see)
-####print(testing)
 
 """
 Exporting to a file
 """
 
 ####computer = input("Enter the name of your purchase: ")+".txt"
-##file = open("computer.txt", 'w+')
-##index=0
-##print(len(lines))
-##print(len(titles))
+file = open("computer.txt", 'w+')
+index=0
+randomTesting(lines)
+print(len(lines))
+print(len(titles))
 ##while index!=len(titles):
 ##    file.write(titles[index].upper()+":")
 ##    file.write("\n")
@@ -193,5 +185,5 @@ Exporting to a file
 ##        file.write("\n")
 ##        break
 ##    file.write(line)
-        
+##        
 ##file.close()
