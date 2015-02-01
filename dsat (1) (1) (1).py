@@ -86,70 +86,79 @@ titles.append("Price")
 Code for accessing parameters efficiently 
 """
 
-alright=soup.find_all("div", class_="specContent")      #this line will fix everything tomorrow
-
-
-right=soup.find_all("span")
-
-test=[]
-
-for line in right:
-    test.append(line)
-
-start=0
-locatorStart = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~146"})             #code for finding specific things
-for line in test:
-    if locatorStart == line:
-        break
-    start += 1
-
-priceIndex=0
-locatorPrice = soup.find("span", {"class" : "pAmt strike"})
-for line in test:
-    if locatorPrice == line:
-        break
-    priceIndex += 1
+##test=[]
+##
+##for line in right:
+##    test.append(line)
+##
+##start=0
+##locatorStart = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~146"})             #code for finding specific things
+##for line in test:
+##    if locatorStart == line:
+##        break
+##    start += 1
+##
+##priceIndex=0
+##locatorPrice = soup.find("span", {"class" : "pAmt strike"})
+##for line in test:
+##    if locatorPrice == line:
+##        break
+##    priceIndex += 1
 
 
 """
 Code for printing the details of each title
 """
-info=[]
-for line in right:
-    info.append(line)
-randomTesting(info)
+alright=soup.find_all("div", class_="specContent")
 lines=[]
-print(len(info))
-for i in range(start,len(titles)+start):
-    lines.append(strip_tags(str(info[i])))
+for line in alright:
+    lines.append(strip_tags(str(line)))
+
 deletePart=[]
 i=0
 emptStr=0
-##randomTesting(lines)
-for line in lines:
-    if len(line) <=1:
-        if emptStr>0 :
-            deletePart.append(i)
-            emptStr=0
-    elif '/xa0' in line:
-        if emptStr>0 :
-            deletePart.append(i)
-            emptStr=0
-    elif 'Choose Options' in line:
-        deletePart.append(i)
-        emptStr += 1
-    i+=1
-print(deletePart)
+
+yay = open("miracle.txt", 'w+')
+
+for line in lines:		
+    yay.write(str(line))
+    yay.write("\n")				
+yay.close()		
+superList=[]		
+letsFix=open("miracle.txt")		
+for line in letsFix:		
+    superList.append(line)
+
+print(superList)
+letsFix.close()
+
+    
+##for line in lines:
+####    if len(line) <=1:
+####        if emptStr>0 :
+####            deletePart.append(i)
+####            emptStr=0
+##    if '/xa0' in line:
+####            line.replace("/xa0", "")
+##            print(line)
+####            emptStr=0
+##    elif 'Choose Options' in line:
+##        line.replace("Choose Options", "")
+##        print(line)
+####        emptStr += 1
+##    i+=1
+
+
+
 deletePart.sort(reverse=True)
 
 for i in deletePart:
     lines.pop(i)
-    
+ 
 
-##del deletePart[0]
-##for num in deletePart:
-##    lines.pop(num)
-lines.append(strip_tags(str(test[priceIndex+4])))
+priceFinder=soup.find_all("div", class_="pLine dellPrice")
+
+lines.append(strip_tags(str(priceFinder)))
 
 ####commaSep=lines[11].split(",")
 ####moreSep=commaSep[1].split("/")
@@ -161,9 +170,8 @@ Exporting to a file
 """
 
 ####computer = input("Enter the name of your purchase: ")+".txt"
-file = open("computer.txt", 'w+')
+##file = open("computer.txt", 'w+')
 index=0
-randomTesting(lines)
 print(len(lines))
 print(len(titles))
 ##while index!=len(titles):
