@@ -49,7 +49,7 @@ def geturl():
 ##
 ##print("The full URL is",product_url)
 
-page = urllib.request.urlopen("http://www.dell.com/uk/p/xps-13-9343-laptop/pd?oc=cnx4310&model_id=xps-13-9343-laptop")
+page = urllib.request.urlopen("http://www.dell.com/uk/p/inspiron-15-3542-laptop/pd?oc=cn54243&model_id=inspiron-15-3542-laptop")
 
 soup = BeautifulSoup(page)
 
@@ -80,7 +80,7 @@ for line in cleanList:
 titles=[]
 for line in fixList:
     titles.append(strip_tags(line))
-titles.append("Price")
+titles.append(" Price")
 
 """
 Code for accessing parameters efficiently 
@@ -129,69 +129,68 @@ letsFix=open("miracle.txt")
 for line in letsFix:		
     superList.append(line)
 
-print(superList)
 letsFix.close()
-
     
-##for line in lines:
-####    if len(line) <=1:
-####        if emptStr>0 :
-####            deletePart.append(i)
-####            emptStr=0
-##    if '/xa0' in line:
-####            line.replace("/xa0", "")
-##            print(line)
-####            emptStr=0
-##    elif 'Choose Options' in line:
-##        line.replace("Choose Options", "")
-##        print(line)
-####        emptStr += 1
-##    i+=1
+for line in superList:
+    if len(line) <=1:
+        if emptStr>0 :
+            deletePart.append(i)
+            emptStr=0
+    if '/xa0' in line:
+            deletePart.append(i)
+            emptStr=0
+    elif 'Choose Options' in line:
+        deletePart.append(i)
+        emptStr += 1
+    i+=1
 
 
 
 deletePart.sort(reverse=True)
 
 for i in deletePart:
-    lines.pop(i)
+    superList.pop(i)
  
-
+randomList=[]
 priceFinder=soup.find_all("div", class_="pLine dellPrice")
+randomList.append(strip_tags(str(priceFinder)))
+for line in randomList:
+    if "Price" in line and "[" and "]":
+        Priceline=line
+if "Price" in Priceline and "[" and "]":
+    change1=Priceline.replace("[", "")
+    change2=change1.replace("Price", "")
+    actualPrice=change2.replace("]", "")
+finalPrice = actualPrice.replace("\n", "")
+superList.append(finalPrice)
 
-lines.append(strip_tags(str(priceFinder)))
 
 ####commaSep=lines[11].split(",")
 ####moreSep=commaSep[1].split("/")
 ####portsDetail=commaSep+moreSep
 ##
 
+
 """
 Exporting to a file
 """
 
 ####computer = input("Enter the name of your purchase: ")+".txt"
-##file = open("computer.txt", 'w+')
+file = open("computer.txt", 'w+')
 index=0
-print(len(lines))
+print(len(superList))
 print(len(titles))
-##while index!=len(titles):
-##    file.write(titles[index].upper()+":")
-##    file.write("\n")
-####    if index == 11:
-####        for line in portsDetail:
-####            file.write("-"+line)
-####            file.write("\n")
-####        file.write("\n")
-##    file.write(lines[index])
-##    file.write("\n")
-##    file.write("\n")
-##    index += 1
-
-##for line in lines:
-##    for title in titles:
-##        file.write(title)
+while index!=len(titles):
+    file.write(titles[index].upper()+":")
+    file.write("\n")
+##    if index == 11:
+##        for line in portsDetail:
+##            file.write("-"+line)
+##            file.write("\n")
 ##        file.write("\n")
-##        break
-##    file.write(line)
-##        
-##file.close()
+    file.write(superList[index])
+    file.write("\n")
+    file.write("\n")
+    index += 1
+
+file.close()
