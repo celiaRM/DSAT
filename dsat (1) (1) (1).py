@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 import urllib.request
 from html.parser import HTMLParser
-
+import os
 class MLStripper(HTMLParser):   #class taken from http://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
     def __init__(self):
         self.reset()
@@ -49,7 +49,7 @@ def geturl():
 ##
 ##print("The full URL is",product_url)
 
-page = urllib.request.urlopen("http://www.dell.com/uk/p/inspiron-15-3542-laptop/pd?oc=cn54243&model_id=inspiron-15-3542-laptop")
+page = urllib.request.urlopen("http://www.dell.com/uk/p/alienware-alpha/pd?oc=d00asm01&model_id=alienware-alpha")
 
 soup = BeautifulSoup(page)
 
@@ -104,8 +104,7 @@ Code for accessing parameters efficiently
 ##    if locatorPrice == line:
 ##        break
 ##    priceIndex += 1
-
-
+##sorted(myDict.items(), key=lambda x: x[1])    #this code sorts dictionaries depending on key value. Code from http://stackoverflow.com/questions/613183/sort-a-python-dictionary-by-value
 """
 Code for printing the details of each title
 """
@@ -144,6 +143,8 @@ for line in superList:
         emptStr += 1
     i+=1
 
+##ports=soup.find_all("div", class_="specContent data-specIndex='31'")
+##print(ports)
 
 
 deletePart.sort(reverse=True)
@@ -170,27 +171,72 @@ superList.append(finalPrice)
 ####portsDetail=commaSep+moreSep
 ##
 
-
 """
-Exporting to a file
+Menu code
 """
+print("Welcome to the Dell Systems Analytical Tool")
+print("What would you like to do next?")
+print("1. View the details of a specific product")
+print("2. Compare the prices of Dell products")
+select = input("To select a function, type it's number here or type 'q' to quit: ")
+finalPrices={}
+priceList=[]
+while not select in ("quit","q","Quit","Q"):
+    if select == "1":
+        file = open("computer.txt", 'w+')
+        index=0
+        print(len(superList))
+        print(len(titles))
+        while index!=len(titles):
+            file.write(titles[index].upper()+":")
+            file.write("\n")
+        ##    if index == 11:
+        ##        for line in portsDetail:
+        ##            file.write("-"+line)
+        ##            file.write("\n")
+        ##        file.write("\n")
+            file.write(superList[index])
+            file.write("\n")
+            file.write("\n")
+            index += 1
 
-####computer = input("Enter the name of your purchase: ")+".txt"
-file = open("computer.txt", 'w+')
-index=0
-print(len(superList))
-print(len(titles))
-while index!=len(titles):
-    file.write(titles[index].upper()+":")
-    file.write("\n")
-##    if index == 11:
-##        for line in portsDetail:
-##            file.write("-"+line)
-##            file.write("\n")
-##        file.write("\n")
-    file.write(superList[index])
-    file.write("\n")
-    file.write("\n")
-    index += 1
+        file.close()
+        print("What would you like to do next?")
+        print("1. View the details of another product")
+        print("2. Compare the prices of Dell products")
+        select = input("To select a function, type it's number here or type 'q' to quit: ")
+    elif select == "2":
+        URLlist = []
+        finished = False
+        while not finished:
+            computerURL = input("Enter the URL of the Dell product or type 'finished' to end: ")
+            if computerURL == "finished":
+                break
+            URLlist.append(computerURL)
+        for URL in URLlist:
+            soupComputer = BeautifulSoup(urllib.request.urlopen(URL))
+            randomList=[]
+            priceFinder=soupComputer.find_all("div", class_="pLine dellPrice")
+            randomList.append(strip_tags(str(priceFinder)))
+            for line in randomList:
+                if "Price" in line and "[" and "]":
+                    Priceline=line
+            if "Price" in Priceline and "[" and "]":
+                change1=Priceline.replace("[", "")
+                change2=change1.replace("Price", "")
+                actualPrice=change2.replace("]", "")
+            finalPrice = actualPrice.replace("\n", "")
+            priceList.append(finalPrice)
+        for i in range(0,len(URLlist)):
+            finalPrices[URLlist[i]]=priceList[i]
+        print("{0:<60s}".format("Product:"),"Price:")
+        sorted(finalPrices.items(), key=lambda x: x[1])
+        for key in finalPrices:
+            print("{0:<31s}".format(key),finalPrices[key])
+        print("What would you like to do next?")
+        print("1. View the details of a specific product")
+        print("2. Compare the prices of Dell products")
+        select = input("To select a function, type it's number here or type 'q' to quit: ")
+       
+os.remove("miracle.txt")
 
-file.close()
