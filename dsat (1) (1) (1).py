@@ -155,9 +155,11 @@ for i in deletePart:
 randomList=[]
 priceFinder=soup.find_all("div", class_="pLine dellPrice")
 randomList.append(strip_tags(str(priceFinder)))
+
 for line in randomList:
     if "Price" in line and "[" and "]":
         Priceline=line
+
 if "Price" in Priceline and "[" and "]":
     change1=Priceline.replace("[", "")
     change2=change1.replace("Price", "")
@@ -187,6 +189,7 @@ while not select in ("quit","q","Quit","Q"):
         index=0
         print(len(superList))
         print(len(titles))
+
         while index!=len(titles):
             file.write(titles[index].upper()+":")
             file.write("\n")
@@ -201,42 +204,53 @@ while not select in ("quit","q","Quit","Q"):
             index += 1
 
         file.close()
+        os.remove("miracle.txt")
+        print("\n")
         print("What would you like to do next?")
         print("1. View the details of another product")
         print("2. Compare the prices of Dell products")
         select = input("To select a function, type it's number here or type 'q' to quit: ")
+
     elif select == "2":
         URLlist = []
         finished = False
+
         while not finished:
             computerURL = input("Enter the URL of the Dell product or type 'finished' to end: ")
+
             if computerURL == "finished":
                 break
             URLlist.append(computerURL)
+
         for URL in URLlist:
             soupComputer = BeautifulSoup(urllib.request.urlopen(URL))
             randomList=[]
             priceFinder=soupComputer.find_all("div", class_="pLine dellPrice")
             randomList.append(strip_tags(str(priceFinder)))
+
             for line in randomList:
                 if "Price" in line and "[" and "]":
                     Priceline=line
+
             if "Price" in Priceline and "[" and "]":
                 change1=Priceline.replace("[", "")
                 change2=change1.replace("Price", "")
                 actualPrice=change2.replace("]", "")
             finalPrice = actualPrice.replace("\n", "")
             priceList.append(finalPrice)
+
         for i in range(0,len(URLlist)):
             finalPrices[URLlist[i]]=priceList[i]
         print("{0:<60s}".format("Product:"),"Price:")
         sorted(finalPrices.items(), key=lambda x: x[1])
+
         for key in finalPrices:
             print("{0:<31s}".format(key),finalPrices[key])
+        print("\n")
         print("What would you like to do next?")
         print("1. View the details of a specific product")
         print("2. Compare the prices of Dell products")
         select = input("To select a function, type it's number here or type 'q' to quit: ")
        
-os.remove("miracle.txt")
+
 
