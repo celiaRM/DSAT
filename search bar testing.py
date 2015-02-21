@@ -2,15 +2,15 @@ from bs4 import BeautifulSoup
 import urllib.request
 from html.parser import HTMLParser
 import os
-myVar =""
+URLdetails =""
 class MyHTMLParser(HTMLParser): #modified but from http://stackoverflow.com/questions/3075550/how-can-i-get-href-links-from-html-code
     def handle_starttag(self, tag, attrs):          #global idea http://stackoverflow.com/questions/423379/using-global-variables-in-a-function-other-than-the-one-that-created-them
-        global myVar
+        global URLdetails
         if tag == "a":      
            for name, value in attrs:
                if name == "href":
-                   myVar = myVar + value + "\n"
-
+                   URLdetails = URLdetails + value + "\n"
+                   
 class MLStripper(HTMLParser):   #class taken from http://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
     def __init__(self):
         self.reset()
@@ -39,10 +39,14 @@ def URLsearch(productName):
         searchAddOn = searchAddOn + "+" +keyWords[i]
     return "http://search.euro.dell.com/results.aspx?s=dhs&c=uk&l=en&cs=ukdhs1&cat=all&k=" + searchAddOn
 
+def URLFinalSearch(URLextraPart):
+    return "http://www.dell.com/" + searchAddOn
+
 def enterURL(extracode):
     return "http://search.euro.dell.com/"+extracode
 
 product="inspiron"
+lowCase = product.lower()
 
 page = urllib.request.urlopen(URLsearch(product))
 
@@ -59,17 +63,52 @@ for line in locator:
 
 parser = MyHTMLParser()
 parser.feed(str(locator))
-print(myVar)
 
+searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
+LinksTitles = {}
 
 """
 Choosing a link
 """
-wordSep = product.split()
-iSearch = 0
-for word in wordSep:                #problem is it has to go through as many elements as in len list. Will fix later
-    print(word)
-    if word in productNameList:
-        print("yes")
-#            finalPrices[URLlist[i]]=priceList[i]
-    iSearch += 1
+wordSep = lowCase.split()
+for word in wordSep:
+    for i in range(0,len(productNameList)):                         
+        if word in productNameList[i].lower():
+            LinksTitles[productNameList[i]] = searchLinks[i]          
+titleSelect = {}
+numList=1
+linksCount=0
+for key in LinksTitles:
+    print(numList,"-",key)
+    titleSelect[searchLinks[linksCount]] = numList
+    numList += 1
+    linksCount += 1
+
+page.close()
+
+selectionInput = input("Select a product by entering the corresponding number on the left: ")
+for key in titleSelect:
+    if selectionInput in str(titleSelect[key]):
+        finalURL = enterURL(key)
+        typeSelector = urllib.request.urlopen(finalURL)
+        typesSoup = BeautifulSoup(typeSelector)
+        linkFinder = typesSoup.find_all("h2", class_="pStackHeader")
+        URLdetails = ""
+        findA=MyHTMLParser()
+        findA.feed(str(linkFinder))
+        productNamesStrip = strip_tags(str(linkFinder))
+        if "]" in productNamesStrip or "[" in productNamesStrip:
+            productNamesStrip = productNamesStrip.replace("]", "")
+            productNamesStrip = productNamesStrip.replace("[", "")
+            finalProductNamesStrip = productNamesStrip.replace("\n", "")
+        productNames = finalProductNamesStrip.split(",")
+        nameLinks = URLdetails.split()
+        namesWithLinks = {}
+        for i in range (0,len(nameLinks)):
+            namesWithLinks[productNames[i]] = nameLinks[i]   
+        print(namesWithLinks)
+
+        
+        break
+        
+        
