@@ -3,7 +3,9 @@ import collections
 import urllib.request
 from html.parser import HTMLParser
 import os
+
 URLdetails =""
+
 class MyHTMLParser(HTMLParser): #modified but from http://stackoverflow.com/questions/3075550/how-can-i-get-href-links-from-html-code
     def handle_starttag(self, tag, attrs):          #global idea http://stackoverflow.com/questions/423379/using-global-variables-in-a-function-other-than-the-one-that-created-them
         global URLdetails
@@ -36,8 +38,10 @@ def randomTesting(testList):
 def URLsearch(productName):
     keyWords = productName.split()
     searchAddOn=keyWords[0]
+
     for i in range(1,len(keyWords)):
         searchAddOn = searchAddOn + "+" +keyWords[i]
+
     return "http://search.euro.dell.com/results.aspx?s=dhs&c=uk&l=en&cs=ukdhs1&cat=all&k=" + searchAddOn
 
 def URLFinalSearch(URLextraPart):
@@ -46,19 +50,23 @@ def URLFinalSearch(URLextraPart):
 def enterURL(extracode):
     return "http://search.euro.dell.com/"+extracode
 
-def SearchBar(product):
+def soupWebsite(URL):
+    page = urllib.request.urlopen(URL)
+    soup = BeautifulSoup(page)
+
+    return soup
+
+def searchBar(product):
     global URLdetails
     URLdetails = ""
     lowCase = product.lower()
 
-    page = urllib.request.urlopen(URLsearch(product))
-
+    page = urllib.request.urlopen(URLsearch(product))   
     soup = BeautifulSoup(page)
 
     """
     Locating the URL code
     """
-    #input("Please enter the name of the product you would like to know more about: ")
     locator = soup.find_all("div", class_="rgTitle")
     productNameList=[]
     for line in locator:
@@ -68,7 +76,6 @@ def SearchBar(product):
     parser.feed(str(locator))
 
     searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
-
 
     """
     Choosing a link
@@ -140,137 +147,171 @@ def SearchBar(product):
                     finalURL = URLFinalSearch(key)
                     return(finalURL)
             break
-"""
-Opening website html on python
-"""
-page = urllib.request.urlopen(SearchBar(input("Enter your search query: ")))
 
-soup = BeautifulSoup(page)
 
-allTitles=soup.find_all("h5")
+def productTitles(soupHTML):
+    allTitles=soupHTML.find_all("h5")
+    ok=[]
+    for h5 in allTitles:
+        if h5 != "</h5>" or h5 != "<h5>":
+            ok.append(h5)
 
-"""
-Code for printing titles
-"""
+    emptList=[]
+    for word in ok:
+        emptList.append(str(word))
 
-ok=[]
-for h5 in allTitles:
-    if h5 != "</h5>" or h5 != "<h5>":
-        ok.append(h5)
-
-emptList=[]
-for word in ok:
-    emptList.append(str(word))
-
-cleanList=[]
-for line in emptList:
-    newstr = line.replace("\t", " ")
-    cleanList.append(newstr)
-    
-fixList=[]
-for line in cleanList:
-    fixList.append(" ".join(line.split()))
- 
-titles=[]
-for line in fixList:
-    titles.append(strip_tags(line))
-titles.append(" Price")
-
-"""
-Code for printing the details of each title
-"""
-alright=soup.find_all("div", class_="specContent")
-lines=[]
-for line in alright:
-    lines.append(strip_tags(str(line)))
-
-deletePart=[]
-i=0
-emptStr=0
-
-yay = open("miracle.txt", 'w+')
-
-for line in lines:		
-    yay.write(str(line))
-    yay.write("\n")				
-yay.close()		
-superList=[]		
-letsFix=open("miracle.txt")		
-for line in letsFix:		
-    superList.append(line)
-
-letsFix.close()
-    
-for line in superList:
-    if len(line) <=1:
-        if emptStr>0 :
-            deletePart.append(i)
-            emptStr=0
-    if '/xa0' in line:
-            deletePart.append(i)
-            emptStr=0
-    elif 'Choose Options' in line:
-        deletePart.append(i)
-        emptStr += 1
-    i+=1
-
-deletePart.sort(reverse=True)
-
-for i in deletePart:
-    superList.pop(i)
- 
-randomList=[]
-priceFinder=soup.find_all("div", class_="pLine dellPrice")
-randomList.append(strip_tags(str(priceFinder)))
-
-for line in randomList:
-    if "Price" in line and "[" and "]":
-        Priceline=line
-
-if "Price" in Priceline and "[" and "]":
-    change1=Priceline.replace("[", "")
-    change2=change1.replace("Price", "")
-    actualPrice=change2.replace("]", "")
-finalPrice = actualPrice.replace("\n", "")
-superList.append(finalPrice)
-
-"""
-Menu code
-"""
-print("Welcome to the Dell Systems Analytical Tool")
-print("What would you like to do next?")
-print("1. View the details of a specific product")
-print("2. Compare the prices of Dell products")
-select = input("To select a function, type it's number here or type 'q' to quit: ")
-finalPrices={}
-priceList=[]
-while not select in ("quit","q","Quit","Q"):
-    if select == "1":
+    cleanList=[]
+    for line in emptList:
+        newstr = line.replace("\t", " ")
+        cleanList.append(newstr)
         
+    fixList=[]
+    for line in cleanList:
+        fixList.append(" ".join(line.split()))
+     
+    titles=[]
+    for line in fixList:
+        titles.append(strip_tags(line))
+    titles.append(" Price")
+
+    return titles
+
+def productDetails(soupHTML):
+    alright=soupHTML.find_all("div", class_="specContent")
+    lines=[]
+    for line in alright:
+        lines.append(strip_tags(str(line)))
+
+    deletePart=[]
+    i=0
+    emptStr=0
+
+    yay = open("miracle.txt", 'w+')
+
+    for line in lines:		
+        yay.write(str(line))
+        yay.write("\n")				
+    yay.close()		
+    superList=[]		
+    letsFix=open("miracle.txt")		
+    for line in letsFix:		
+        superList.append(line)
+
+    letsFix.close()
+        
+    for line in superList:
+        if len(line) <=1:
+            if emptStr>0 :
+                deletePart.append(i)
+                emptStr=0
+        if '/xa0' in line:
+                deletePart.append(i)
+                emptStr=0
+        elif 'Choose Options' in line:
+            deletePart.append(i)
+            emptStr += 1
+        i+=1
+
+    deletePart.sort(reverse=True)
+
+    for i in deletePart:
+        superList.pop(i)
+     
+    randomList=[]
+    priceFinder=soupHTML.find_all("div", class_="pLine dellPrice")
+    randomList.append(strip_tags(str(priceFinder)))
+
+    for line in randomList:
+        if "Price" in line and "[" and "]":
+            Priceline=line
+
+    if "Price" in Priceline and "[" and "]":            
+        Priceline=Priceline.replace("[", "")
+        Priceline=Priceline.replace("Price", "")
+        Priceline=Priceline.replace("]", "")
+    Priceline = Priceline.replace("\n", "")
+    superList.append(Priceline)
+
+    return superList
+
+def exportToFile(titlesList,detailsList):
         file = open("computer.txt", 'w+')
         index=0
-        print(len(superList))
-        print(len(titles))
 
-        while index!=len(titles):
-            file.write(titles[index].upper()+":")
+        while index!=len(titlesList):
+            file.write(titlesList[index].upper()+":")
             file.write("\n")
         ##    if index == 11:
         ##        for line in portsDetail:
         ##            file.write("-"+line)
         ##            file.write("\n")
         ##        file.write("\n")
-            file.write(superList[index])
+            file.write(detailsList[index])
             file.write("\n")
             file.write("\n")
             index += 1
-
         file.close()
         os.remove("miracle.txt")
+
+def productPrice(URLlist):
+    priceList = []
+    randomList = []
+    
+    for URL in URLlist:
+        soupComputer = soupWebsite(URL)
+        priceFinder=soupComputer.find_all("div", class_="pLine dellPrice")
+        randomList.append(strip_tags(str(priceFinder)))
+    
+    for line in randomList:
+        line = line.replace("[", "")
+        line = line.replace("Price", "")
+        line = line.replace("]", "")
+        line = line.replace("\n", "")
+        priceList.append(line)
+
+    return priceList
+
+def productName(URLlist):
+    namesList = []
+    extraList = []
+    for URL in URLlist:
+        soupComputer = soupWebsite(URL)
+        nameFinder=soupComputer.find_all("h1", class_="cufonGothamBook")
+        extraList.append(strip_tags(str(nameFinder)))
+
+    for name in extraList:
+        name = name.replace("]","")
+        name = name.replace("\r\n\t\t\t\t\t\t\t\t\t\t\t","")
+        name = name.replace("/t","")
+        name = name.replace("[","")
+        namesList.append(name)
+
+    return namesList
+    
+
+"""
+Menu code
+"""
+print("Welcome to the Dell Systems Analytical Tool")
+print("What would you like to do next?")
+print("1 - View the details of a specific product")
+print("2 - Compare the prices of Dell products")
+select = input("To select a function, type it's number here or type 'q' to quit: ")
+finalPrices = {}
+
+while not select in ("quit","q","Quit","Q"):
+    if select == "1":
+        product = input("Enter your search query: ")
+        exactProduct = searchBar(product)
+        accessProduct = soupWebsite(exactProduct)
+        titlesPart = productTitles(accessProduct)
+        detailsPart = productDetails(accessProduct)
+        exportToFile(titlesPart,detailsPart)
+
         print("\n")
         print("What would you like to do next?")
-        print("1. View the details of another product")
-        print("2. Compare the prices of Dell products")
+        print("1 - View the details of another product")
+        print("2 - Compare the prices of Dell products")
         select = input("To select a function, type it's number here or type 'q' to quit: ")
 
     elif select == "2":
@@ -278,38 +319,33 @@ while not select in ("quit","q","Quit","Q"):
         finished = False
 
         while not finished:
-            computerURL = input("Enter the URL of the Dell product or type 'finished' to end: ")
-
-            if computerURL == "finished":
+            product = input("Enter your search query (Enter 'end' when finished): ")
+            if product.lower() == "end":
                 break
-            URLlist.append(computerURL)
+            else:
+                exactProduct = searchBar(product)
+                URLlist.append(exactProduct)
+        if len(URLlist) == 0:
+            print("You did not select any product")
+            print("\n")
+            print("What would you like to do next?")
+            print("1 - View the details of a specific product")
+            print("2 - Compare the prices of Dell products")
+            select = input("To select a function, type it's number here or type 'q' to quit: ")
+        else:
+            priceList = productPrice(URLlist)
+            nameList = productName(URLlist)
+            print(priceList)
+            print(nameList)
+            for i in range(0,len(nameList)):
+                finalPrices[nameList[i]]=priceList[i]
+            print("{0:<50s}".format("Product:"),"Price:")
+            sorted(finalPrices.items(), key=lambda x: x[1])
 
-        for URL in URLlist:
-            soupComputer = BeautifulSoup(urllib.request.urlopen(URL))
-            randomList=[]
-            priceFinder=soupComputer.find_all("div", class_="pLine dellPrice")
-            randomList.append(strip_tags(str(priceFinder)))
-
-            for line in randomList:
-                if "Price" in line and "[" and "]":
-                    Priceline=line
-
-            if "Price" in Priceline and "[" and "]":
-                change1=Priceline.replace("[", "")
-                change2=change1.replace("Price", "")
-                actualPrice=change2.replace("]", "")
-            finalPrice = actualPrice.replace("\n", "")
-            priceList.append(finalPrice)
-
-        for i in range(0,len(URLlist)):
-            finalPrices[URLlist[i]]=priceList[i]
-        print("{0:<60s}".format("Product:"),"Price:")
-        sorted(finalPrices.items(), key=lambda x: x[1])
-
-        for key in finalPrices:
-            print("{0:<31s}".format(key),finalPrices[key])
-        print("\n")
-        print("What would you like to do next?")
-        print("1. View the details of a specific product")
-        print("2. Compare the prices of Dell products")
-        select = input("To select a function, type it's number here or type 'q' to quit: ")
+            for key in finalPrices:
+                print("{0:<50s}".format(key),finalPrices[key])
+            print("\n")
+            print("What would you like to do next?")
+            print("1 - View the details of a specific product")
+            print("2 - Compare the prices of other Dell products")
+            select = input("To select a function, type it's number here or type 'q' to quit: ")
