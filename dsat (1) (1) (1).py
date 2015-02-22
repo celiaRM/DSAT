@@ -67,86 +67,177 @@ def searchBar(product):
     """
     Locating the URL code
     """
+    extraLinkFinder = soup.find_all("div", class_="c4 seriesTitle")
     locator = soup.find_all("div", class_="rgTitle")
-    productNameList=[]
-    for line in locator:
-        productNameList.append(strip_tags(str(line)))
 
-    parser = MyHTMLParser()
-    parser.feed(str(locator))
+    if len(extraLinkFinder)>0:
+        productNameList = []
+        cleanProductNameList = []
+        LinksTitles = collections.OrderedDict()
 
-    searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
+        for line in extraLinkFinder:
+            productNameList.append(strip_tags(str(line)))
 
-    """
-    Choosing a link
-    """
-    wordSep = lowCase.split()
-    finalNameList = []
-    LinksTitles = collections.OrderedDict()                                #learnt how to do this using: http://pymotw.com/2/collections/ordereddict.html
+        parser = MyHTMLParser()
+        parser.feed(str(extraLinkFinder))
 
-    for word in wordSep:
-        for i in range(0,len(productNameList)):                         
-            if word in productNameList[i].lower():
-                LinksTitles[productNameList[i]] = searchLinks[i] 
+        searchLinks =  URLdetails.split()
 
-    for i in range (0,len(finalNameList)):
-        for word in finalNameList:
-            LinksTitles[word]=1
-            
-    titleSelect = collections.OrderedDict()
-    numList=1
-    linksCount=0
+        for name in productNameList:
+            name = name.replace("\n", "")
+            cleanProductNameList.append(name)
 
-    for key in LinksTitles:
-        print(numList,"-",key)
-        titleSelect[searchLinks[linksCount]] = numList
-        numList += 1
-        linksCount += 1
+        for i in range (len(searchLinks)-1,-1,-1):
+            if "#" in searchLinks[i]:
+                searchLinks.pop(i)
 
-    page.close()
 
-    selectionInput = input("\nSelect a product by entering the corresponding number on the left: ")
-    for key in titleSelect:
-        if selectionInput in str(titleSelect[key]):
-            nextURL = enterURL(key)
-            typeSelector = urllib.request.urlopen(nextURL)
-            typesSoup = BeautifulSoup(typeSelector)
-            linkFinder = typesSoup.find_all("h2", class_="pStackHeader")
-            cleanLinkFinder = str(linkFinder).split('<h2 class="pStackHeader">')
-            URLdetails = ""
-            findA=MyHTMLParser()
-            findA.feed(str(linkFinder))
-            productNamesList=[]
+        print(searchLinks)
+        print(cleanProductNameList)
 
-            for elem in cleanLinkFinder:
-                productName = strip_tags(elem)
-                if "]" in productName or "[" in productName:
-                    productName = productName.replace("]", "")
-                    productName = productName.replace("[", "")
-                productName = productName.replace("\n", "")
-                productNamesList.append(productName)
+        numList=1
+        linksCount=0
 
-            nameLinks = URLdetails.split()
-            namesWithLinks = collections.OrderedDict()
-            productNamesList.pop(0)
-            for i in range (0,len(nameLinks)):
-                namesWithLinks[productNamesList[i]] = nameLinks[i]   
-            numSelector = 1
-            anotherIndex = 0
-            modelSelect = collections.OrderedDict()
+        for key in LinksTitles:
+            print(numList,"-",key)
+            titleSelect[searchLinks[linksCount]] = numList
+            numList += 1
+            linksCount += 1
 
-            for key in namesWithLinks:
-                print(numSelector,"-",key)
-                modelSelect[nameLinks[anotherIndex]] = numSelector
-                numSelector += 1
-                anotherIndex += 1
-            modelInput = input("\nSelect a model by entering the corresponding number on the left: ")
+        page.close()
 
-            for key in modelSelect:
-                if modelInput in str(modelSelect[key]):
-                    finalURL = URLFinalSearch(key)
-                    return(finalURL)
-            break
+        selectionInput = input("\nSelect a product by entering the corresponding number on the left: ")
+
+        for key in titleSelect:
+            if selectionInput in str(titleSelect[key]):
+                nextURL = enterURL(key)
+                typeSelector = urllib.request.urlopen(nextURL)
+                typesSoup = BeautifulSoup(typeSelector)
+                linkFinder = typesSoup.find_all("h2", class_="pStackHeader")
+                if len(linkFinder)==0:
+                    return(nextURL)
+                    break
+                else:
+                    cleanLinkFinder = str(linkFinder).split('<h2 class="pStackHeader">')
+                    URLdetails = ""
+                    findA=MyHTMLParser()
+                    findA.feed(str(linkFinder))
+                    productNamesList=[]
+
+                    for elem in cleanLinkFinder:
+                        productName = strip_tags(elem)
+                        if "]" in productName or "[" in productName:
+                            productName = productName.replace("]", "")
+                            productName = productName.replace("[", "")
+                        productName = productName.replace("\n", "")
+                        productNamesList.append(productName)
+
+                    nameLinks = URLdetails.split()
+                    namesWithLinks = collections.OrderedDict()
+                    productNamesList.pop(0)
+                    for i in range (0,len(nameLinks)):
+                        namesWithLinks[productNamesList[i]] = nameLinks[i]   
+                    numSelector = 1
+                    anotherIndex = 0
+                    modelSelect = collections.OrderedDict()
+
+                    for key in namesWithLinks:
+                        print(numSelector,"-",key)
+                        modelSelect[nameLinks[anotherIndex]] = numSelector
+                        numSelector += 1
+                        anotherIndex += 1
+                    modelInput = input("\nSelect a model by entering the corresponding number on the left: ")
+
+                    for key in modelSelect:
+                        if modelInput in str(modelSelect[key]):
+                            finalURL = URLFinalSearch(key)
+                            return(finalURL)
+                    break
+    
+    elif len(locator)>0:
+        productNameList=[]
+        for line in locator:
+            productNameList.append(strip_tags(str(line)))
+
+        parser = MyHTMLParser()
+        parser.feed(str(locator))
+
+        searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
+
+        """
+        Choosing a link
+        """
+        wordSep = lowCase.split()
+        finalNameList = []
+        LinksTitles = collections.OrderedDict()                                #learnt how to do this using: http://pymotw.com/2/collections/ordereddict.html
+
+        for word in wordSep:
+            for i in range(0,len(productNameList)):                         
+                if word in productNameList[i].lower():
+                    LinksTitles[productNameList[i]] = searchLinks[i] 
+
+        for i in range (0,len(finalNameList)):
+            for word in finalNameList:
+                LinksTitles[word]=1
+                
+        titleSelect = collections.OrderedDict()
+        numList=1
+        linksCount=0
+
+        for key in LinksTitles:
+            print(numList,"-",key)
+            titleSelect[searchLinks[linksCount]] = numList
+            numList += 1
+            linksCount += 1
+
+        page.close()
+
+        selectionInput = input("\nSelect a product by entering the corresponding number on the left: ")
+        for key in titleSelect:
+            if selectionInput in str(titleSelect[key]):
+                nextURL = enterURL(key)
+                typeSelector = urllib.request.urlopen(nextURL)
+                typesSoup = BeautifulSoup(typeSelector)
+                linkFinder = typesSoup.find_all("h2", class_="pStackHeader")
+                if len(linkFinder)==0:
+                    return(nextURL)
+                    break
+                else:
+                    cleanLinkFinder = str(linkFinder).split('<h2 class="pStackHeader">')
+                    URLdetails = ""
+                    findA=MyHTMLParser()
+                    findA.feed(str(linkFinder))
+                    productNamesList=[]
+
+                    for elem in cleanLinkFinder:
+                        productName = strip_tags(elem)
+                        if "]" in productName or "[" in productName:
+                            productName = productName.replace("]", "")
+                            productName = productName.replace("[", "")
+                        productName = productName.replace("\n", "")
+                        productNamesList.append(productName)
+
+                    nameLinks = URLdetails.split()
+                    namesWithLinks = collections.OrderedDict()
+                    productNamesList.pop(0)
+                    for i in range (0,len(nameLinks)):
+                        namesWithLinks[productNamesList[i]] = nameLinks[i]   
+                    numSelector = 1
+                    anotherIndex = 0
+                    modelSelect = collections.OrderedDict()
+
+                    for key in namesWithLinks:
+                        print(numSelector,"-",key)
+                        modelSelect[nameLinks[anotherIndex]] = numSelector
+                        numSelector += 1
+                        anotherIndex += 1
+                    modelInput = input("\nSelect a model by entering the corresponding number on the left: ")
+
+                    for key in modelSelect:
+                        if modelInput in str(modelSelect[key]):
+                            finalURL = URLFinalSearch(key)
+                            return(finalURL)
+                    break
 
 
 def productTitles(soupHTML):
@@ -299,9 +390,13 @@ print("2 - Compare the prices of Dell products")
 select = input("To select a function, type it's number here or type 'q' to quit: ")
 finalPrices = {}
 
-while not select in ("quit","q","Quit","Q"):
+while select not in ("quit","q","Quit","Q"):
     if select == "1":
         product = input("Enter your search query: ")
+
+        if product == "all in one":
+            product = "all-in-one"
+
         exactProduct = searchBar(product)
         accessProduct = soupWebsite(exactProduct)
         titlesPart = productTitles(accessProduct)
