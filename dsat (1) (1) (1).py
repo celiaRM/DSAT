@@ -1,8 +1,17 @@
-import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+import collections
 import urllib.request
 from html.parser import HTMLParser
 import os
+URLdetails =""
+class MyHTMLParser(HTMLParser): #modified but from http://stackoverflow.com/questions/3075550/how-can-i-get-href-links-from-html-code
+    def handle_starttag(self, tag, attrs):          #global idea http://stackoverflow.com/questions/423379/using-global-variables-in-a-function-other-than-the-one-that-created-them
+        global URLdetails
+        if tag == "a":      
+           for name, value in attrs:
+               if name == "href":
+                   URLdetails = URLdetails + value + "\n"
+                   
 class MLStripper(HTMLParser):   #class taken from http://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
     def __init__(self):
         self.reset()
@@ -23,33 +32,118 @@ def randomTesting(testList):
     for line in testList:
         print(line)
         print()
+        
+def URLsearch(productName):
+    keyWords = productName.split()
+    searchAddOn=keyWords[0]
+    for i in range(1,len(keyWords)):
+        searchAddOn = searchAddOn + "+" +keyWords[i]
+    return "http://search.euro.dell.com/results.aspx?s=dhs&c=uk&l=en&cs=ukdhs1&cat=all&k=" + searchAddOn
+
+def URLFinalSearch(URLextraPart):
+    return "http://www.dell.com/" + URLextraPart
+
+def enterURL(extracode):
+    return "http://search.euro.dell.com/"+extracode
+
+def SearchBar(product):
+    global URLdetails
+    URLdetails = ""
+    lowCase = product.lower()
+
+    page = urllib.request.urlopen(URLsearch(product))
+
+    soup = BeautifulSoup(page)
+
+    """
+    Locating the URL code
+    """
+    #input("Please enter the name of the product you would like to know more about: ")
+    locator = soup.find_all("div", class_="rgTitle")
+    productNameList=[]
+    for line in locator:
+        productNameList.append(strip_tags(str(line)))
+
+    parser = MyHTMLParser()
+    parser.feed(str(locator))
+
+    searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
+
+
+    """
+    Choosing a link
+    """
+    wordSep = lowCase.split()
+    finalNameList = []
+    LinksTitles = collections.OrderedDict()                                #learnt how to do this using: http://pymotw.com/2/collections/ordereddict.html
+
+    for word in wordSep:
+        for i in range(0,len(productNameList)):                         
+            if word in productNameList[i].lower():
+                LinksTitles[productNameList[i]] = searchLinks[i] 
+
+    for i in range (0,len(finalNameList)):
+        for word in finalNameList:
+            LinksTitles[word]=1
+            
+    titleSelect = collections.OrderedDict()
+    numList=1
+    linksCount=0
+
+    for key in LinksTitles:
+        print(numList,"-",key)
+        titleSelect[searchLinks[linksCount]] = numList
+        numList += 1
+        linksCount += 1
+
+    page.close()
+
+    selectionInput = input("\nSelect a product by entering the corresponding number on the left: ")
+    for key in titleSelect:
+        if selectionInput in str(titleSelect[key]):
+            nextURL = enterURL(key)
+            typeSelector = urllib.request.urlopen(nextURL)
+            typesSoup = BeautifulSoup(typeSelector)
+            linkFinder = typesSoup.find_all("h2", class_="pStackHeader")
+            cleanLinkFinder = str(linkFinder).split('<h2 class="pStackHeader">')
+            URLdetails = ""
+            findA=MyHTMLParser()
+            findA.feed(str(linkFinder))
+            productNamesList=[]
+
+            for elem in cleanLinkFinder:
+                productName = strip_tags(elem)
+                if "]" in productName or "[" in productName:
+                    productName = productName.replace("]", "")
+                    productName = productName.replace("[", "")
+                productName = productName.replace("\n", "")
+                productNamesList.append(productName)
+
+            nameLinks = URLdetails.split()
+            namesWithLinks = collections.OrderedDict()
+            productNamesList.pop(0)
+            for i in range (0,len(nameLinks)):
+                namesWithLinks[productNamesList[i]] = nameLinks[i]   
+            numSelector = 1
+            anotherIndex = 0
+            modelSelect = collections.OrderedDict()
+
+            for key in namesWithLinks:
+                print(numSelector,"-",key)
+                modelSelect[nameLinks[anotherIndex]] = numSelector
+                numSelector += 1
+                anotherIndex += 1
+            modelInput = input("\nSelect a model by entering the corresponding number on the left: ")
+
+            for key in modelSelect:
+                if modelInput in str(modelSelect[key]):
+                    finalURL = URLFinalSearch(key)
+                    return(finalURL)
+            break
 """
 Opening website html on python
 """
-
-def geturl():
-
-    err=True
-
-    print("Enter the full URL of the Dell product.\nMake sure to get the URL after http://www.dell.com/uk/p/.")
-
-    while err == True:
-
-        err=False
-
-        url=input("URL: ")
-
-        fullurl = "http://www.dell.com/uk/p/" + url
-
-    return fullurl
-
-
-
-##product_url = geturl()
-##
-##print("The full URL is",product_url)
-
-page = urllib.request.urlopen("http://www.dell.com/uk/p/alienware-alpha/pd?oc=d00asm01&model_id=alienware-alpha")
+page = urllib.request.urlopen(SearchBar(input("Enter your search query: ")))
 
 soup = BeautifulSoup(page)
 
@@ -82,29 +176,6 @@ for line in fixList:
     titles.append(strip_tags(line))
 titles.append(" Price")
 
-"""
-Code for accessing parameters efficiently 
-"""
-
-##test=[]
-##
-##for line in right:
-##    test.append(line)
-##
-##start=0
-##locatorStart = soup.find("span", {"class" : "shortSpec spec~bjAwYXczMDE~146"})             #code for finding specific things
-##for line in test:
-##    if locatorStart == line:
-##        break
-##    start += 1
-##
-##priceIndex=0
-##locatorPrice = soup.find("span", {"class" : "pAmt strike"})
-##for line in test:
-##    if locatorPrice == line:
-##        break
-##    priceIndex += 1
-##sorted(myDict.items(), key=lambda x: x[1])    #this code sorts dictionaries depending on key value. Code from http://stackoverflow.com/questions/613183/sort-a-python-dictionary-by-value
 """
 Code for printing the details of each title
 """
@@ -143,10 +214,6 @@ for line in superList:
         emptStr += 1
     i+=1
 
-##ports=soup.find_all("div", class_="specContent data-specIndex='31'")
-##print(ports)
-
-
 deletePart.sort(reverse=True)
 
 for i in deletePart:
@@ -167,12 +234,6 @@ if "Price" in Priceline and "[" and "]":
 finalPrice = actualPrice.replace("\n", "")
 superList.append(finalPrice)
 
-
-####commaSep=lines[11].split(",")
-####moreSep=commaSep[1].split("/")
-####portsDetail=commaSep+moreSep
-##
-
 """
 Menu code
 """
@@ -185,6 +246,7 @@ finalPrices={}
 priceList=[]
 while not select in ("quit","q","Quit","Q"):
     if select == "1":
+        
         file = open("computer.txt", 'w+')
         index=0
         print(len(superList))
@@ -251,6 +313,3 @@ while not select in ("quit","q","Quit","Q"):
         print("1. View the details of a specific product")
         print("2. Compare the prices of Dell products")
         select = input("To select a function, type it's number here or type 'q' to quit: ")
-       
-
-
