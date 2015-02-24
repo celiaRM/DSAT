@@ -162,14 +162,14 @@ def searchBar(product):
         parser = MyHTMLParser()
         parser.feed(str(locator))
 
-        searchLinks =  URLdetails.split()                           #searchLinks contains actual links for each one
+        searchLinks =  URLdetails.split()                   #searchLinks contains actual links for each one
 
         """
         Choosing a link
         """
         wordSep = lowCase.split()
         finalNameList = []
-        LinksTitles = collections.OrderedDict()                                #learnt how to do this using: http://pymotw.com/2/collections/ordereddict.html
+        LinksTitles = collections.OrderedDict()                             #learnt how to do this using: http://pymotw.com/2/collections/ordereddict.html
 
         for word in wordSep:
             for i in range(0,len(productNameList)):                         
@@ -277,17 +277,16 @@ def productDetails(soupHTML):
     i=0
     emptStr=0
 
-    yay = open("miracle.txt", 'w+')
+    yay = open("miracle.txt", 'w+',encoding="utf-8")
 
     for line in lines:		
         yay.write(str(line))
         yay.write("\n")				
     yay.close()		
     superList=[]		
-    letsFix=open("miracle.txt")		
+    letsFix=open("miracle.txt", 'r', encoding="utf-8")		
     for line in letsFix:		
         superList.append(line)
-
     letsFix.close()
         
     for line in superList:
@@ -326,7 +325,7 @@ def productDetails(soupHTML):
     return superList
 
 def exportToFile(titlesList,detailsList):
-        file = open("computer.txt", 'w+')
+        file = open("computer.txt", 'w+', encoding="utf-8")
         index=0
 
         while index!=len(titlesList):
