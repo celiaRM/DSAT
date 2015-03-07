@@ -615,19 +615,20 @@ canvas.create_window((2,3), window=frame, anchor="nw",
 frame.bind("<Configure>",myfunction)
 
 extraButtons = []
+detailStore = []
 
 def clearExtraButtons():
 	for b in extraButtons:
 		b.destroy()
 	del extraButtons[:]
 
-def searchButtonCallback(searchQuery):
+def searchButtonCallback(searchQuery, shouldIrepeat = 0):
 	clearExtraButtons()
 	listOfStuff = searchStep1(searchQuery)
 
-	i = 4
+	i = 5
 	for key in listOfStuff:
-		makeButton(listOfStuff[key], key, 1, i)
+		makeButton(listOfStuff[key], key, 1, i, shouldIrepeat)
 		i+=1
 	#print(listOfStuff)
 
@@ -635,18 +636,23 @@ def saveToFileButtonCallback(titles, details):
 	exportToFile(titles, details)
 	return 0
 
-def createSearchBar():
+def createSearchBar(shouldIrepeat = 0):
 	clearExtraButtons()
 	e = Entry(frame)
-	e.grid(row=3, column=1)
+	e.grid(row=4, column=1)
 
 	e.focus_set()
 
-	b = Button(frame, text="Search", width=10, command=lambda: searchButtonCallback(e.get()))
-	b.grid(row=3, column=2)
+	b = Button(frame, text="Search", width=10, command=lambda: searchButtonCallback(e.get(),shouldIrepeat))
+	b.grid(row=4, column=2)
 
 	extraButtons.append(e)
 	extraButtons.append(b)
+
+	if(shouldIrepeat == 1):
+		b2 = Button(frame, text="Stop", width=10, command=lambda: comparissonSearch(detailStore))
+		b2.grid(row=4, column=3)
+		extraButtons.append(b2)
 
 
 def showProductDetails(URL):
@@ -659,9 +665,9 @@ def showProductDetails(URL):
 	for i in range(0,len(titles)):
 		titlesDetails[titles[i]]=details[i]
 	
-	i = 4
+	i = 5
 	for key in titlesDetails:
-		proc = Label(frame, text=key + ": " + titlesDetails[key], width=50, wraplength=300)
+		proc = Label(frame, text=key + ": " + titlesDetails[key], width=50, wraplength=300, background="#ffffff")
 		proc.grid(row=i, column=0, columnspan=3)
 		i+=1
 
@@ -677,45 +683,71 @@ def showProductDetails(URL):
 	saveToFileButton.grid(row=i, column=1)
 	extraButtons.append(saveToFileButton)
 
-def listButtonCallback2(URL):
-	clearExtraButtons()
-	showProductDetails(searchStep3(URL))
 
-def listButtonCallback(URL):
+def comparissonSearch(URLlist):
+	finalPrices = {}
+	print(URLlist)
+	priceList = productPrice(URLlist)
+	nameList = productName(URLlist)
+	for i in range(0,len(nameList)):
+		finalPrices[nameList[i]]=priceList[i]
+		print("{0:<50s}".format("Product:"),"Price:")
+	#sorted(finalPrices.items(), key=lambda x: x[1])
+
+def pressButtonForPriceComparison():
+	createSearchBar(1)
+
+	
+def listButtonCallback2(URL, shouldIrepeat = 0):
+	clearExtraButtons()
+	if(shouldIrepeat == 0):
+		showProductDetails(searchStep3(URL))
+	else:
+		detailStore.append(searchStep3(URL)[1])
+		createSearchBar(1)
+
+
+def listButtonCallback(URL, shouldIrepeat = 0):
 	clearExtraButtons()
 	result = searchStep2(URL)
 	if(result[0] == 0):
 		#go to product
-		showProductDetails(searchStep3(result[1]))
+		if shouldIrepeat == 0:
+			showProductDetails(searchStep3(result[1]))
+		else:
+			detailStore.append(searchStep3(result[1])[1])
+			createSearchBar(1)
 	else:
-		i = 4
+		i = 5
 		for key in result[1]:
-			makeButton(result[1][key], key, 0, i)
+			makeButton(result[1][key], key, 0, i, shouldIrepeat)
 			i+=1
 	return 0
 
 #btype: 1 when the button might go to model types. 0 when it always goes to product
-def makeButton(name, URL, btype, row = 0):
+def makeButton(name, URL, btype, row = 0, shouldIrepeat = 0):
 	specialb = 0
 	if(btype == 1):
-		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback(URL))
+		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback(URL, shouldIrepeat))
 	else:
-		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback2(URL))
+		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback2(URL, shouldIrepeat))
 	specialb.grid(row=row, column=1)
 	extraButtons.append(specialb)
 
 myList =  ["Welcome to the Dell Systems Analytical Tool. ","What would you like to do next?"]
 
+Label(frame, text="", width=20, background="#ffffff").grid(row=0, column=0)
+
 i = 0
 for elem in myList:  
-    w = Label(frame, text=elem)
-    w.grid(row=0, column=i)
+    w = Label(frame, text=elem, background="#ffffff")
+    w.grid(row=i, column=1)
     i+=1
 
 selectb1 =  Button(frame, text="View the details of a specific product", width=30, command=lambda: createSearchBar())
-selectb1.grid(row=1, column=1)
-selectb2 =  Button(frame, text="Compare the prices of Dell products", width=30, command=lambda: searchButtonCallback(e.get()))
-selectb2.grid(row=2, column=1)
+selectb1.grid(row=2, column=1)
+selectb2 =  Button(frame, text="Compare the prices of Dell products", width=30, command=lambda: pressButtonForPriceComparison())
+selectb2.grid(row=3, column=1)
 
 Button(frame, text="Quit", command=root.destroy).grid(row=0, column=2)
 root.mainloop()
