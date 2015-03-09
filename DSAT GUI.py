@@ -475,11 +475,6 @@ def exportToFile(titlesList,detailsList):
 		while index!=len(titlesList):
 			file.write(titlesList[index].upper()+":")
 			file.write("\n")
-		##	if index == 11:
-		##		for line in portsDetail:
-		##			file.write("-"+line)
-		##			file.write("\n")
-		##		file.write("\n")
 			file.write(detailsList[index])
 			file.write("\n")
 			file.write("\n")
@@ -534,7 +529,7 @@ def myfunction(event):
 root = Tk()
 
 root.title("DSAT")
-root.geometry("600x400")
+root.geometry("650x400")
 
 canvas = Canvas(root, borderwidth=0, background="#DDECEF")
 frame = Frame(canvas, background="#DDECEF")
@@ -637,17 +632,22 @@ def comparisonSearch(URLlist):   #delete finalPrices, do the loop with the 2 lis
 		index += 1
 		extraButtons.append(proc)
 	i2 = 7
-	for i in range(0,len(nameList)):
-		html = soupWebsite(URLlist[i])
-		titles = productTitles(html)
-		details = productDetails(html)
-		saveToFileButton = Button(frame, text="Save", width=20, command=lambda: saveToFileButtonCallback(titles, details))
+	for URL in URLlist:
+		saveToFileButton = Button(frame, text="Save", width=20, command=lambda: savingPriceComparison(URL))
 		saveToFileButton.grid(row=i2, column=2)
 		i2 += 1
 
 	detailStore = []
 	print(detailStore)
 	#sorted(finalPrices.items(), key=lambda x: x[1])
+
+def savingPriceComparison(URL):
+	html = soupWebsite(URL)
+	titles = productTitles(html)
+	details = productDetails(html)
+	saveToFileButtonCallback(titles, details)
+	return 0
+
 
 def pressButtonForPriceComparison():
 	clearExtraButtons()
