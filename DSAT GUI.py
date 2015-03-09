@@ -453,6 +453,8 @@ def productDetails(soupHTML):
 	priceFinder=soupHTML.find_all("div", class_="pLine dellPrice")
 	randomList.append(strip_tags(str(priceFinder)))
 
+	Priceline = ""
+
 	for line in randomList:
 		if "Price" in line and "[" and "]":
 			Priceline=line
@@ -606,8 +608,13 @@ def showProductDetails(URL):
 	saveToFileButton.grid(row=i, column=1)
 	extraButtons.append(saveToFileButton)
 
+def makeSaveButton(URL, row = 0):
+	specialb = Button(frame, text="Save", width=20, command=lambda: savingPriceComparison(URL))
+	specialb.grid(row=row, column=2)
+	extraButtons.append(specialb)
 
 def comparisonSearch(URLlist): 
+	clearExtraButtons()
 	finalPrices = collections.OrderedDict()
 
 	priceList = productPrice(URLlist)
@@ -632,9 +639,7 @@ def comparisonSearch(URLlist):
 		extraButtons.append(proc)
 	i2 = 7
 	for URL in URLlist:
-		saveToFileButton = Button(frame, text="Save", width=20, command=lambda: savingPriceComparison(URL))
-		saveToFileButton.grid(row=i2, column=2)
-		extraButtons.append(saveToFileButton)
+		makeSaveButton(URL, i2)
 		i2 += 1
 		
 	detailStore = []
