@@ -464,6 +464,8 @@ def productDetails(soupHTML):
 	Priceline = Priceline.replace("\n", "")
 	superList.append(Priceline)
 
+	os.remove("miracle.txt")
+	
 	return superList
 
 def exportToFile(titlesList,detailsList):
@@ -483,7 +485,6 @@ def exportToFile(titlesList,detailsList):
 			file.write("\n")
 			index += 1
 		file.close()
-		os.remove("miracle.txt")
 
 def productPrice(URLlist):
 	priceList = []
@@ -560,7 +561,7 @@ def searchButtonCallback(searchQuery, shouldIrepeat = 0):
 	clearExtraButtons()
 	listOfStuff = searchStep1(searchQuery)
 
-	i = 5
+	i = 6
 	for key in listOfStuff:
 		makeButton(listOfStuff[key], key, 1, i, shouldIrepeat)
 		i+=1
@@ -573,19 +574,19 @@ def saveToFileButtonCallback(titles, details):
 def createSearchBar(shouldIrepeat = 0):
 	clearExtraButtons()
 	e = Entry(frame)
-	e.grid(row=4, column=1)
+	e.grid(row=5, column=1)
 
 	e.focus_set()
 
 	b = Button(frame, text="Search", width=10, command=lambda: searchButtonCallback(e.get(),shouldIrepeat))
-	b.grid(row=4, column=2)
+	b.grid(row=5, column=2)
 
 	extraButtons.append(e)
 	extraButtons.append(b)
 
 	if(shouldIrepeat == 1):
 		b2 = Button(frame, text="Stop", width=10, command=lambda: comparisonSearch(detailStore))
-		b2.grid(row=4, column=3)
+		b2.grid(row=5, column=3)
 		extraButtons.append(b2)
 
 
@@ -600,7 +601,7 @@ def showProductDetails(URL):
 	for i in range(0,len(titles)):
 		titlesDetails[titles[i]]=details[i]
 	
-	i = 5
+	i = 6
 	for key in titlesDetails:
 		proc = Label(frame, text=key + ": " + titlesDetails[key], width=50, wraplength=300, background="#ffffff")
 		proc.grid(row=i, column=0, columnspan=3)
@@ -612,11 +613,14 @@ def showProductDetails(URL):
 	extraButtons.append(saveToFileButton)
 
 
-def comparisonSearch(URLlist):
+def comparisonSearch(URLlist):   #delete finalPrices, do the loop with the 2 lists 
 	finalPrices = collections.OrderedDict()
 
 	priceList = productPrice(URLlist)
 	nameList = productName(URLlist)
+	print(len(priceList))
+	print(len(nameList))
+	print(nameList)
 
 	for i in range(0,len(nameList)):
 		finalPrices[nameList[i]]=priceList[i]
@@ -626,15 +630,23 @@ def comparisonSearch(URLlist):
 	extraButtons.append(start)
 	print(len(finalPrices))
 
-	index = 6
-	for key in finalPrices:
-		proc = Label(frame, text=key + "            " + finalPrices[key], width=50, wraplength=300, background="#DDECEF")
+	index = 7
+	for i in range(0,len(nameList)):
+		proc = Label(frame, text=nameList[i] + "            " + priceList[i], width=50, wraplength=300, background="#DDECEF")
 		proc.grid(row=index, column=0, columnspan=3)
-		print(index)
 		index += 1
 		extraButtons.append(proc)
+	i2 = 7
+	for i in range(0,len(nameList)):
+		html = soupWebsite(URLlist[i])
+		titles = productTitles(html)
+		details = productDetails(html)
+		saveToFileButton = Button(frame, text="Save", width=20, command=lambda: saveToFileButtonCallback(titles, details))
+		saveToFileButton.grid(row=i2, column=2)
+		i2 += 1
 
 	detailStore = []
+	print(detailStore)
 	#sorted(finalPrices.items(), key=lambda x: x[1])
 
 def pressButtonForPriceComparison():
@@ -662,7 +674,7 @@ def listButtonCallback(URL, shouldIrepeat = 0):
 			detailStore.append(searchStep3(result[1])[1])
 			createSearchBar(1)
 	else:
-		i = 5
+		i = 6
 		for key in result[1]:
 			makeButton(result[1][key], key, 0, i, shouldIrepeat)
 			i+=1
@@ -672,9 +684,9 @@ def listButtonCallback(URL, shouldIrepeat = 0):
 def makeButton(name, URL, btype, row = 0, shouldIrepeat = 0):
 	specialb = 0
 	if(btype == 1):
-		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback(URL, shouldIrepeat))
+		specialb = Button(frame, text=name, width=50, command=lambda: listButtonCallback(URL, shouldIrepeat))
 	else:
-		specialb = Button(frame, text=name, width=30, command=lambda: listButtonCallback2(URL, shouldIrepeat))
+		specialb = Button(frame, text=name, width=50, command=lambda: listButtonCallback2(URL, shouldIrepeat))
 	specialb.grid(row=row, column=1)
 	extraButtons.append(specialb)
 
@@ -692,6 +704,7 @@ selectb1 =  Button(frame, text="View the details of a specific product", width=3
 selectb1.grid(row=2, column=1)
 selectb2 =  Button(frame, text="Compare the prices of Dell products", width=30, command=lambda: pressButtonForPriceComparison())
 selectb2.grid(row=3, column=1)
-
+empty = Label(frame, text="", width=50, wraplength=300, background="#DDECEF")
+empty.grid(row=4, column=1)
 Button(frame, text="Quit", command=root.destroy).grid(row=0, column=2)
 root.mainloop()
