@@ -469,7 +469,7 @@ def productDetails(soupHTML):
 	return superList
 
 def exportToFile(titlesList,detailsList):
-		file = open("computer.txt", 'w+', encoding="utf-8")
+		file = open("dellProduct.txt", 'w+', encoding="utf-8")
 		index=0
 
 		while index!=len(titlesList):
@@ -560,7 +560,6 @@ def searchButtonCallback(searchQuery, shouldIrepeat = 0):
 	for key in listOfStuff:
 		makeButton(listOfStuff[key], key, 1, i, shouldIrepeat)
 		i+=1
-	#print(listOfStuff)
 
 def saveToFileButtonCallback(titles, details):
 	exportToFile(titles, details)
@@ -608,7 +607,7 @@ def showProductDetails(URL):
 	extraButtons.append(saveToFileButton)
 
 
-def comparisonSearch(URLlist):   #delete finalPrices, do the loop with the 2 lists 
+def comparisonSearch(URLlist): 
 	finalPrices = collections.OrderedDict()
 
 	priceList = productPrice(URLlist)
@@ -635,10 +634,13 @@ def comparisonSearch(URLlist):   #delete finalPrices, do the loop with the 2 lis
 	for URL in URLlist:
 		saveToFileButton = Button(frame, text="Save", width=20, command=lambda: savingPriceComparison(URL))
 		saveToFileButton.grid(row=i2, column=2)
+		extraButtons.append(saveToFileButton)
 		i2 += 1
-
+		
 	detailStore = []
+	i2 = 7
 	print(detailStore)
+	index = 7
 	#sorted(finalPrices.items(), key=lambda x: x[1])
 
 def savingPriceComparison(URL):
@@ -653,7 +655,6 @@ def pressButtonForPriceComparison():
 	clearExtraButtons()
 	createSearchBar(1)
 
-	
 def listButtonCallback2(URL, shouldIrepeat = 0):
 	clearExtraButtons()
 	if(shouldIrepeat == 0):
